@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.os.Message;
 
 import com.jay.cloud_board.meeting_protocal.HeartBeatProtocol;
+import com.jay.cloud_board.util.LogUtil;
 
 
 /**
@@ -16,7 +17,7 @@ public class HeartBeat {
 
     private static final long HEART_BEAT_TIME = 5000;
     private static final int MSG_BEAT = 0;
-    private static boolean isBeatting;
+    private static final String TAG = HeartBeat.class.getSimpleName();
     private static Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -31,9 +32,7 @@ public class HeartBeat {
      * 开启心跳任务
      */
     public static void startBeat() {
-
-        if (isBeatting)
-            return;
+        LogUtil.d(TAG, "startBeat");
 
         mHandler.postDelayed(new Runnable() {
             @Override
@@ -43,11 +42,10 @@ public class HeartBeat {
             }
         }, HEART_BEAT_TIME);
 
-        isBeatting = true;
     }
 
     public static void stop() {
+        LogUtil.d(TAG, "stop");
         mHandler.removeCallbacksAndMessages(null);
-        isBeatting = false;
     }
 }

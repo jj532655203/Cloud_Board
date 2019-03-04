@@ -61,7 +61,7 @@ public class TcpService extends Service {
                         // 建立Socket连接
                         Socket _socket = new Socket();
                         //                        _socket.connect(new InetSocketAddress("39.98.191.61", 3389), 5000);
-                        _socket.connect(new InetSocketAddress("192.168.1.103", 3389), 5000);
+                        _socket.connect(new InetSocketAddress("192.168.1.103", 9423), 5000);
 
                         Global.setSocket(_socket);
 

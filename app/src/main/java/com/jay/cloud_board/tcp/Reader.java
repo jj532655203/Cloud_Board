@@ -17,12 +17,14 @@ public class Reader {
     private static boolean is2Stop;
 
     public static void stop() {
+        LogUtil.d(TAG,"stop");
+
         if (sReadRunnable == null)
             return;
 
         is2Stop = true;
         try {
-            Thread.sleep(500);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -32,6 +34,7 @@ public class Reader {
     }
 
     public static void restartRead() {
+        LogUtil.d(TAG,"restartRead");
         stop();
         startRead();
     }
@@ -41,6 +44,7 @@ public class Reader {
      * 推荐在service组件调用
      */
     public static void startRead() {
+        LogUtil.d(TAG,"startRead");
         if (sReadRunnable != null)
             return;
 

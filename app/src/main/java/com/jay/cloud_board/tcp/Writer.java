@@ -37,13 +37,14 @@ public class Writer {
     }
 
     public static void stop() {
+        LogUtil.d(TAG,"stop");
 
         if (sWriteRunnable == null)
             return;
 
         is2Stop = true;
         try {
-            Thread.sleep(50);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -53,6 +54,7 @@ public class Writer {
     }
 
     public static void restartWrite() {
+        LogUtil.d(TAG,"restartWrite");
         stop();
         startWrite();
     }
@@ -62,6 +64,7 @@ public class Writer {
      * 推荐在service组件调用
      */
     public static void startWrite() {
+        LogUtil.d(TAG,"startWrite");
         if (sWriteRunnable != null)
             return;
 

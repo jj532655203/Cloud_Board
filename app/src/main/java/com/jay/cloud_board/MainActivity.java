@@ -150,9 +150,9 @@ public class MainActivity extends AppCompatActivity {
         Process.killProcess(Process.myPid());
     }
 
-    private void recon2Server() {
-        Toast.makeText(MainActivity.this, "与服务器断连!", Toast.LENGTH_SHORT).show();
-        Toast.makeText(MainActivity.this, "正在尝试重连!", Toast.LENGTH_SHORT).show();
+    private void reconn2Server() {
+        LogUtil.d(TAG,"reconn2Server");
+        Toast.makeText(MainActivity.this, "正在尝试重连服务器!", Toast.LENGTH_SHORT).show();
         mTcpService.disConnect();
         mTcpService.startConnect();
     }
@@ -162,8 +162,12 @@ public class MainActivity extends AppCompatActivity {
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleNetworkStateChangedException(NetWorkStateChangedEvent event) {
+        LogUtil.d(TAG,"handleNetworkStateChangedException");
         if (Global.getNetWorkState() == NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED)
             Toast.makeText(MainActivity.this, "请检查网络!", Toast.LENGTH_SHORT).show();
+        else{
+            reconn2Server();
+        }
     }
 
     /**
@@ -173,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleFailedConn2ServerEvent(FailedConn2ServerEvent event) {
+        LogUtil.d(TAG,"handleFailedConn2ServerEvent");
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -192,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == MSG_RE_CONN_2_SERVER) {
-                mActivityRef.get().recon2Server();
+                mActivityRef.get().reconn2Server();
             }
         }
     }
