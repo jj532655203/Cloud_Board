@@ -7,12 +7,18 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.jay.cloud_board.base.Global;
+import com.jay.cloud_board.eventbus.FailedConn2ServerEvent;
+import com.jay.cloud_board.eventbus.NetWorkStateChangedEvent;
+import com.jay.cloud_board.meeting_protocal.LoginProtocol;
+import com.jay.cloud_board.tcp.HeartBeat;
 import com.jay.cloud_board.tcp.JobExecutor;
 import com.jay.cloud_board.tcp.Reader;
 import com.jay.cloud_board.tcp.Writer;
-import com.jay.cloud_board.meeting_protocal.LoginProtocol;
 import com.jay.cloud_board.util.LogUtil;
 
+import org.greenrobot.eventbus.EventBus;
+
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -41,7 +47,6 @@ public class TcpService extends Service {
 
 
     public class ClientBinder extends Binder {
-        private Socket mmSocket;
 
         /**
          * 连接服务端
@@ -54,22 +59,31 @@ public class TcpService extends Service {
                     try {
 
                         // 建立Socket连接
-                        mmSocket = new Socket();
-                        mmSocket.connect(new InetSocketAddress("39.98.191.61", 3389), 5000);
+                        Socket _socket = new Socket();
+                        //                        _socket.connect(new InetSocketAddress("39.98.191.61", 3389), 5000);
+                        _socket.connect(new InetSocketAddress("192.168.1.103", 3389), 5000);
 
-                        Writer.setSocket(mmSocket);
+                        Global.setSocket(_socket);
 
                         //开启线程:发协议
+                        Writer.startWrite();
+
+                        //断连服务器
                         LoginProtocol loginProtocol = new LoginProtocol();
                         loginProtocol.setUserId(Global.getUserRole());
                         Writer.send(loginProtocol);
 
                         //开启线程:读服务端协议
-                        Reader.read(mmSocket);
+                        Reader.startRead();
 
-                    } catch (Exception e) {
+                        //开启心跳机制
+                        HeartBeat.startBeat();
+
+                    } catch (IOException e) {
                         e.printStackTrace();
-                        LogUtil.e(TAG, "mmConnectRun run() 连接服务端失败");
+                        if (Global.getNetWorkState() != NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED)
+                            EventBus.getDefault().post(new FailedConn2ServerEvent());
+                        LogUtil.e(TAG, "mmConnectRun run() 无法连接服务器");
                     }
                 }
             });
@@ -79,17 +93,24 @@ public class TcpService extends Service {
         /**
          * 与服务端断开连接
          */
-        private void disConnect() {
+        public void disConnect() {
+
+            Writer.stop();
+            Reader.stop();
+            HeartBeat.stop();
+
             JobExecutor.getInstance().execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         LogUtil.d(TAG, "正在执行断连: disConnect");
 
-                        if (mmSocket != null) {
-                            mmSocket.shutdownInput();
-                            mmSocket.shutdownOutput();
-                            mmSocket.close();
+                        Socket _socket = Global.getSocket();
+                        Global.setSocket(null);
+                        if (_socket != null) {
+                            _socket.shutdownInput();
+                            _socket.shutdownOutput();
+                            _socket.close();
                         }
                     } catch (Exception e) {
                         e.printStackTrace();

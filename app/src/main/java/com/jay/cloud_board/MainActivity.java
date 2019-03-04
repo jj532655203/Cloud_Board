@@ -3,9 +3,12 @@ package com.jay.cloud_board;
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Process;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jay.cloud_board.base.Global;
+import com.jay.cloud_board.eventbus.FailedConn2ServerEvent;
+import com.jay.cloud_board.eventbus.NetWorkStateChangedEvent;
 import com.jay.cloud_board.meeting_protocal.LoginProtocol;
+import com.jay.cloud_board.receiver.NetWorkStateReceiver;
 import com.jay.cloud_board.service.TcpService;
 import com.jay.cloud_board.tcp.Writer;
 import com.jay.cloud_board.util.LogUtil;
@@ -28,6 +34,11 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 import org.androidannotations.annotations.WindowFeature;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.lang.ref.WeakReference;
 
 import io.reactivex.functions.Consumer;
 
@@ -36,6 +47,7 @@ import io.reactivex.functions.Consumer;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int MSG_RE_CONN_2_SERVER = 0;
     @ViewById(R.id.boardView)
     public BoardView mBoardView;
     @ViewById(R.id.boardWriting)
@@ -43,26 +55,38 @@ public class MainActivity extends AppCompatActivity {
     @ViewById(R.id.switchRole)
     public TextView mSwitchRole;
 
+    private Handler mHandler = new UiHandler(new WeakReference<>(this));
+
+    private TcpService.ClientBinder mTcpService;
     private ServiceConnection mTcpConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             LogUtil.d(TAG, "onServiceConnected");
 
-            TcpService.ClientBinder clientBinder = (TcpService.ClientBinder) service;
-            clientBinder.startConnect();
+            mTcpService = (TcpService.ClientBinder) service;
+            mTcpService.startConnect();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             LogUtil.d(TAG, "onServiceDisconnected");
+
+            mTcpService.disConnect();
         }
     };
+    private NetWorkStateReceiver mNetReceiver;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mBoardView.mBoardWriting = mBoardWriting;
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
+        EventBus.getDefault().register(this);
         RxPermissions rxPermissions = new RxPermissions(this);
         rxPermissions.requestEach(Manifest.permission.INTERNET)
                 .subscribe(new Consumer<Permission>() {
@@ -79,19 +103,26 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+        rxPermissions.requestEach(Manifest.permission.INTERNET)
+                .subscribe(new Consumer<Permission>() {
+                    @Override
+                    public void accept(Permission permission) throws Exception {
+                    }
+                });
+        mNetReceiver = new NetWorkStateReceiver();
+        IntentFilter filter = new IntentFilter(NetWorkStateReceiver.CONNECTIVITY_CHANGE);
+        registerReceiver(mNetReceiver, filter);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mTcpConn);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        mBoardView.mBoardWriting = mBoardWriting;
+        if (EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().unregister(this);
+        if (mNetReceiver != null)
+            unregisterReceiver(mNetReceiver);
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     /**
@@ -115,8 +146,54 @@ public class MainActivity extends AppCompatActivity {
     @Click(R.id.exit)
     public void exit(View view) {
         LogUtil.d(TAG, "exit");
-
+        //        finish();
         Process.killProcess(Process.myPid());
+    }
 
+    private void recon2Server() {
+        Toast.makeText(MainActivity.this, "与服务器断连!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "正在尝试重连!", Toast.LENGTH_SHORT).show();
+        mTcpService.disConnect();
+        mTcpService.startConnect();
+    }
+
+    /**
+     * 处理:网络状态变更
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleNetworkStateChangedException(NetWorkStateChangedEvent event) {
+        if (Global.getNetWorkState() == NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED)
+            Toast.makeText(MainActivity.this, "请检查网络!", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 处理:无法连接服务器
+     *
+     * @param event
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleFailedConn2ServerEvent(FailedConn2ServerEvent event) {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mHandler.obtainMessage(MSG_RE_CONN_2_SERVER).sendToTarget();
+            }
+        }, 5000);
+    }
+
+    private static class UiHandler extends Handler {
+        private WeakReference<MainActivity> mActivityRef;
+
+        public UiHandler(WeakReference<MainActivity> reference) {
+            mActivityRef = reference;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == MSG_RE_CONN_2_SERVER) {
+                mActivityRef.get().recon2Server();
+            }
+        }
     }
 }

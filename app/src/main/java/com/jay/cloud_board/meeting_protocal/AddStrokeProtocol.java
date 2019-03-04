@@ -1,5 +1,6 @@
 package com.jay.cloud_board.meeting_protocal;
 
+import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.bean.Point;
 
 import java.io.Serializable;
@@ -14,7 +15,19 @@ public class AddStrokeProtocol extends MeetingProtocol implements Serializable {
 
     private String receiverUserId;
     private ArrayList<Point> mPoints = new ArrayList<>();
+    private String userRole;
 
+    public AddStrokeProtocol() {
+        setProtocolType(Constant.PROTOCOL_TYPE_ADD_STROKE);
+    }
+
+    public String getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(String userRole) {
+        this.userRole = userRole;
+    }
 
     public ArrayList<Point> getPoints() {
         return mPoints;
@@ -39,6 +52,7 @@ public class AddStrokeProtocol extends MeetingProtocol implements Serializable {
         return super.toString() +
                 "AddStrokeProtocol{" +
                 "receiverUserId='" + receiverUserId + '\'' +
+                "userRole='" + userRole + '\'' +
                 ", mPoints=" + mPoints +
                 '}';
     }

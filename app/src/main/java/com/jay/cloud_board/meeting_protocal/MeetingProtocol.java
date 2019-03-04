@@ -7,8 +7,8 @@ package com.jay.cloud_board.meeting_protocal;
 public class MeetingProtocol {
 
 	private String userId;
-	private String userRole;
 	private int protocolType;
+
 
 	public String getUserId() {
 		return userId;
@@ -16,14 +16,6 @@ public class MeetingProtocol {
 
 	public void setUserId(String userId) {
 		this.userId = userId;
-	}
-
-	public String getUserRole() {
-		return userRole;
-	}
-
-	public void setUserRole(String userRole) {
-		this.userRole = userRole;
 	}
 
 	public int getProtocolType() {
@@ -37,7 +29,6 @@ public class MeetingProtocol {
 	@Override
 	public String toString() {
 		return "MeetingProtocol{" +
-				"userId='" + userId + '\'' +
 				"userId='" + userId + '\'' +
 				", protocolType='" + protocolType + '\'' +
 				'}';
