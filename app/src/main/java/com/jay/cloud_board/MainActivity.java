@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.jay.cloud_board.meeting_protocal.LoginProtocol;
 import com.jay.cloud_board.service.TcpService;
+import com.jay.cloud_board.tcp.Writer;
 import com.jay.cloud_board.util.LogUtil;
 import com.jay.cloud_board.widget.BoardView;
 import com.jay.cloud_board.widget.BoardWriting;

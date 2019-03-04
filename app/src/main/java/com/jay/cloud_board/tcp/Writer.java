@@ -1,4 +1,4 @@
-package com.jay.cloud_board;
+package com.jay.cloud_board.tcp;
 
 import com.google.gson.Gson;
 import com.jay.cloud_board.meeting_protocal.MeetingProtocol;

@@ -12,7 +12,7 @@ import android.view.View;
 
 import com.jay.cloud_board.Constant;
 import com.jay.cloud_board.Global;
-import com.jay.cloud_board.Writer;
+import com.jay.cloud_board.tcp.Writer;
 import com.jay.cloud_board.bean.Point;
 import com.jay.cloud_board.bean.Stroke;
 import com.jay.cloud_board.meeting_protocal.AddStrokeProtocol;
