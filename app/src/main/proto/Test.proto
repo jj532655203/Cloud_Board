@@ -1,0 +1,37 @@
+//指定protobuf语法版本
+syntax = "proto3";
+
+//包名
+//option java_package = "com.lhc.protobuf";
+package com.lhc.protobuf;
+//源文件类名
+option java_outer_classname = "AddressBookProtos";
+
+// class Person
+message Person {
+    string account = 1;
+    string password = 2;
+    //required 必须设置（不能为null）
+//    required string name = 1;
+//    //int32 对应java中的int
+//    required int32 id = 2;
+//    //optional 可以为空
+//    optional string email = 3;
+
+//    enum PhoneType {
+//        MOBILE = 0;
+//        HOME = 1;
+//        WORK = 2;
+//    }
+//
+//    message PhoneNumber {
+//        required string number = 1;
+//        optional PhoneType type = 2 [default = HOME];
+//    }
+//    //repeated 重复的 （集合）
+//    repeated PhoneNumber phones = 4;
+}
+
+//message AddressBook {
+//    repeated Person people = 1;
+//}
