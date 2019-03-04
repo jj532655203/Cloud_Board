@@ -1,7 +1,7 @@
 package com.jay.cloud_board.tcp;
 
 import com.google.gson.Gson;
-import com.jay.cloud_board.Constant;
+import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.meeting_protocal.AddStrokeProtocol;
 import com.jay.cloud_board.meeting_protocal.MeetingProtocol;
 

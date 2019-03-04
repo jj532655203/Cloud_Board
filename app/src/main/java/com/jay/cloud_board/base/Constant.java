@@ -1,4 +1,4 @@
-package com.jay.cloud_board;
+package com.jay.cloud_board.base;
 
 public interface Constant {
 

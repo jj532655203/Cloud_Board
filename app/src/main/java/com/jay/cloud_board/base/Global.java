@@ -1,8 +1,6 @@
-package com.jay.cloud_board;
+package com.jay.cloud_board.base;
 
 import android.text.TextUtils;
-
-import java.net.Socket;
 
 /**
  * Created by Jay on 2019/3/3.

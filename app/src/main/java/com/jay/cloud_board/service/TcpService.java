@@ -6,7 +6,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.jay.cloud_board.Global;
+import com.jay.cloud_board.base.Global;
 import com.jay.cloud_board.tcp.JobExecutor;
 import com.jay.cloud_board.tcp.Reader;
 import com.jay.cloud_board.tcp.Writer;

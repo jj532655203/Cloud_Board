@@ -14,6 +14,7 @@ import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jay.cloud_board.base.Global;
 import com.jay.cloud_board.meeting_protocal.LoginProtocol;
 import com.jay.cloud_board.service.TcpService;
 import com.jay.cloud_board.tcp.Writer;
