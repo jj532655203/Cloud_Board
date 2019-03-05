@@ -19,15 +19,19 @@ import org.greenrobot.eventbus.EventBus;
  */
 
 public class NetWorkStateReceiver extends BroadcastReceiver {
+
     public static final String CONNECTIVITY_CHANGE = "android.net.conn.CONNECTIVITY_CHANGE";
+    public static final String TAG = NetWorkStateReceiver.class.getSimpleName();
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        if (action == null) return;
-        if (!action.equalsIgnoreCase(CONNECTIVITY_CHANGE)) return;
+        if (action == null)
+            return;
+        if (!action.equalsIgnoreCase(CONNECTIVITY_CHANGE))
+            return;
 
-        Log.d("wj", "网络接收者action:" + intent.getAction());
+        Log.d(TAG, "网络接收者action:" + intent.getAction());
 
         NetWorkStateChangedEvent.NetStateType netStateType = null;
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -61,9 +65,20 @@ public class NetWorkStateReceiver extends BroadcastReceiver {
                 }
             }
         }
-        Log.d("wj", "网络状态:" + netStateType);
 
-        Global.setNetWorkState(netStateType);
-        EventBus.getDefault().post(new NetWorkStateChangedEvent(netStateType));
+        //有网-->无网
+        //无网-->有网
+        if ((Global.getNetWorkState() != NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED
+                && netStateType == NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED)
+                ||
+                (Global.getNetWorkState() == NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED
+                        && netStateType != NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED)) {
+
+            Log.d(TAG, "网络状态变更:" + netStateType);
+
+            Global.setNetWorkState(netStateType);
+
+            EventBus.getDefault().post(new NetWorkStateChangedEvent(netStateType));
+        }
     }
 }

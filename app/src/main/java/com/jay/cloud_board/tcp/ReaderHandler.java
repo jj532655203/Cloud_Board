@@ -3,7 +3,7 @@ package com.jay.cloud_board.tcp;
 import com.google.gson.Gson;
 import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.meeting_protocal.AddStrokeProtocol;
-import com.jay.cloud_board.meeting_protocal.MeetingProtocol;
+import com.jay.cloud_board.meeting_protocal.ProxyProtocol;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -15,7 +15,7 @@ public class ReaderHandler {
 
     public void handleProtocol(String jsonStr) {
 
-        MeetingProtocol protocol = new Gson().fromJson(jsonStr, MeetingProtocol.class);
+        ProxyProtocol protocol = new Gson().fromJson(jsonStr, ProxyProtocol.class);
         int protocolType = protocol.getProtocolType();
 
         System.out.println(TAG + "handleProtocol 协议type=" + protocolType);

@@ -1,14 +1,44 @@
 package com.jay.cloud_board.meeting_protocal;
 
-import com.jay.cloud_board.base.Constant;
-
 /**
  * desc:登录/切换账号 协议
  * Created by jj on 2019/3/3.
  */
 
-public class LoginProtocol extends MeetingProtocol {
+public class LoginProtocol {
+
+    private String userId;
+    private int protocolType;
+
     public LoginProtocol() {
-        setProtocolType(Constant.PROTOCOL_TYPE_LOGIN);
+    }
+
+    public LoginProtocol(String userId, int protocolType) {
+        this.userId = userId;
+        this.protocolType = protocolType;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public int getProtocolType() {
+        return protocolType;
+    }
+
+    public void setProtocolType(int protocolType) {
+        this.protocolType = protocolType;
+    }
+
+    @Override
+    public String toString() {
+        return "ProtocolShell{" +
+                "userId='" + userId + '\'' +
+                ", protocolType='" + protocolType + '\'' +
+                '}';
     }
 }

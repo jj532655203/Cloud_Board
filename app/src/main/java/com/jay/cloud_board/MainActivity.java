@@ -17,10 +17,12 @@ import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.base.Global;
 import com.jay.cloud_board.eventbus.FailedConn2ServerEvent;
 import com.jay.cloud_board.eventbus.NetWorkStateChangedEvent;
 import com.jay.cloud_board.meeting_protocal.LoginProtocol;
+import com.jay.cloud_board.meeting_protocal.ProtocolShell;
 import com.jay.cloud_board.receiver.NetWorkStateReceiver;
 import com.jay.cloud_board.service.TcpService;
 import com.jay.cloud_board.tcp.Writer;
@@ -134,9 +136,8 @@ public class MainActivity extends AppCompatActivity {
         Global.switchRole();
 
         //切换账号
-        LoginProtocol switchRoleProtocol = new LoginProtocol();
-        switchRoleProtocol.setUserId(Global.getUserRole());
-        Writer.send(switchRoleProtocol);
+        LoginProtocol switchRoleProtocol = new LoginProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_LOGIN);
+        Writer.send(new ProtocolShell(switchRoleProtocol));
 
         mSwitchRole.setText("切换账号:" + Global.getUserRole());
 

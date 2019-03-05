@@ -12,6 +12,7 @@ import android.view.View;
 
 import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.base.Global;
+import com.jay.cloud_board.meeting_protocal.ProtocolShell;
 import com.jay.cloud_board.tcp.Writer;
 import com.jay.cloud_board.bean.Point;
 import com.jay.cloud_board.bean.Stroke;
@@ -66,17 +67,16 @@ public class BoardView extends View {
             addStroke(mTouchPoints);
 
             //笔划数据发给服务端
-            AddStrokeProtocol addStrokeProtocol = new AddStrokeProtocol();
-            addStrokeProtocol.setPoints(mTouchPoints);
-
             //一期需求:暂时使用用户角色作为用户id,因为只有用户A和B
-            addStrokeProtocol.setUserId(Global.getUserRole());
+            AddStrokeProtocol addStrokeProtocol = new AddStrokeProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_ADD_STROKE);
+            ArrayList<Point> points = new ArrayList<>(mTouchPoints.size());
+            points.addAll(mTouchPoints);
+            addStrokeProtocol.setPoints(points);
             String receiverId = TextUtils.equals(Global.getUserRole(), Global.ROLE_USER_A) ? Global.ROLE_USER_B : Global.ROLE_USER_A;
             addStrokeProtocol.setReceiverUserId(receiverId);
-            addStrokeProtocol.setProtocolType(Constant.PROTOCOL_TYPE_ADD_STROKE);
 
             //向服务端发送
-            Writer.send(addStrokeProtocol);
+            Writer.send(new ProtocolShell(addStrokeProtocol));
             mTouchPoints.clear();
 
             //恢复BoardWriting空屏状态

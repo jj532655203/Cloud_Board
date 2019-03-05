@@ -3,7 +3,8 @@ package com.jay.cloud_board.util;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.jay.cloud_board.BuildConfig;
+import com.jay.cloud_board.base.Config;
+
 
 /**
  * Created by Jay on 2019/3/2.
@@ -12,26 +13,26 @@ import com.jay.cloud_board.BuildConfig;
 public class LogUtil {
 
     public static void d(String tag, String content) {
-        if (!BuildConfig.DEBUG || TextUtils.isEmpty(content))
+        if (!Config.DEBUG || TextUtils.isEmpty(content))
             return;
-        Log.d(tag, content);
+        Log.d("jay---log---" + tag, content);
     }
 
     public static void i(String tag, String content) {
-        if (!BuildConfig.DEBUG || TextUtils.isEmpty(content))
+        if (!Config.DEBUG || TextUtils.isEmpty(content))
             return;
-        Log.i(tag, content);
+        Log.i("jay---log---" + tag, content);
     }
 
     public static void w(String tag, String content) {
-        if (!BuildConfig.DEBUG || TextUtils.isEmpty(content))
+        if (!Config.DEBUG || TextUtils.isEmpty(content))
             return;
-        Log.w(tag, content);
+        Log.w("jay---log---" + tag, content);
     }
 
     public static void e(String tag, String content) {
-        if (!BuildConfig.DEBUG || TextUtils.isEmpty(content))
+        if (!Config.DEBUG || TextUtils.isEmpty(content))
             return;
-        Log.e(tag, content);
+        Log.e("jay---log---" + tag, content);
     }
 }

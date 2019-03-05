@@ -1,9 +1,7 @@
 package com.jay.cloud_board.meeting_protocal;
 
-import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.bean.Point;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -11,14 +9,30 @@ import java.util.ArrayList;
  * Created by Jay on 2019/3/3.
  */
 
-public class AddStrokeProtocol extends MeetingProtocol implements Serializable {
+public class AddStrokeProtocol {
 
+
+    private String userId;
+    private int protocolType;
     private String receiverUserId;
-    private ArrayList<Point> mPoints = new ArrayList<>();
     private String userRole;
+    private ArrayList<Point> points = new ArrayList<>();
 
-    public AddStrokeProtocol() {
-        setProtocolType(Constant.PROTOCOL_TYPE_ADD_STROKE);
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public int getProtocolType() {
+        return protocolType;
+    }
+
+    public void setProtocolType(int protocolType) {
+        this.protocolType = protocolType;
     }
 
     public String getUserRole() {
@@ -29,16 +43,6 @@ public class AddStrokeProtocol extends MeetingProtocol implements Serializable {
         this.userRole = userRole;
     }
 
-    public ArrayList<Point> getPoints() {
-        return mPoints;
-    }
-
-    public void setPoints(ArrayList<Point> points) {
-        for (Point point : points) {
-            mPoints.add(point.clone());
-        }
-    }
-
     public String getReceiverUserId() {
         return receiverUserId;
     }
@@ -47,13 +51,28 @@ public class AddStrokeProtocol extends MeetingProtocol implements Serializable {
         this.receiverUserId = receiverUserId;
     }
 
+
+    public AddStrokeProtocol(String userId, int protocolType) {
+        this.userId = userId;
+        this.protocolType = protocolType;
+    }
+
+    public ArrayList<Point> getPoints() {
+        return points;
+    }
+
+    public void setPoints(ArrayList<Point> points) {
+        this.points = points;
+    }
+
     @Override
     public String toString() {
-        return super.toString() +
-                "AddStrokeProtocol{" +
-                "receiverUserId='" + receiverUserId + '\'' +
-                "userRole='" + userRole + '\'' +
-                ", mPoints=" + mPoints +
+        return "AddStrokeProtocol{" +
+                "userId='" + userId + '\'' +
+                ", protocolType=" + protocolType +
+                ", receiverUserId='" + receiverUserId + '\'' +
+                ", userRole='" + userRole + '\'' +
+                ", points=" + points +
                 '}';
     }
 }

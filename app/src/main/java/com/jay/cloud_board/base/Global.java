@@ -16,7 +16,7 @@ public class Global {
     public static final String ROLE_USER_A = "A";
     public static final String ROLE_USER_B = "B";
     private static Socket sSocket;
-    private static NetWorkStateChangedEvent.NetStateType sNetWorkState;
+    private static NetWorkStateChangedEvent.NetStateType sNetWorkState = NetWorkStateChangedEvent.NetStateType.TYPE_MOBILE_DATA_CONNECTED;
 
 
     public static void switchRole() {

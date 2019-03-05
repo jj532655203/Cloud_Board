@@ -4,7 +4,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import com.jay.cloud_board.base.Constant;
+import com.jay.cloud_board.base.Global;
 import com.jay.cloud_board.meeting_protocal.HeartBeatProtocol;
+import com.jay.cloud_board.meeting_protocal.ProtocolShell;
 import com.jay.cloud_board.util.LogUtil;
 
 
@@ -37,7 +40,8 @@ public class HeartBeat {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Writer.send(new HeartBeatProtocol());
+                HeartBeatProtocol protocol = new HeartBeatProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_BEART_HEAT);
+                Writer.send(new ProtocolShell(protocol));
                 mHandler.obtainMessage(MSG_BEAT).sendToTarget();
             }
         }, HEART_BEAT_TIME);

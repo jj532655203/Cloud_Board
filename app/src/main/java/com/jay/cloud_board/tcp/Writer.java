@@ -2,12 +2,8 @@ package com.jay.cloud_board.tcp;
 
 import com.google.gson.Gson;
 import com.jay.cloud_board.base.Global;
-import com.jay.cloud_board.eventbus.FailedConn2ServerEvent;
-import com.jay.cloud_board.eventbus.NetWorkStateChangedEvent;
-import com.jay.cloud_board.meeting_protocal.MeetingProtocol;
+import com.jay.cloud_board.meeting_protocal.ProtocolShell;
 import com.jay.cloud_board.util.LogUtil;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedOutputStream;
 import java.net.Socket;
@@ -20,7 +16,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class Writer {
 
     private static final String TAG = Writer.class.getSimpleName();
-    private static ArrayBlockingQueue<MeetingProtocol> sBlockingQueue = new ArrayBlockingQueue<>(100);
+    private static ArrayBlockingQueue<Object> sBlockingQueue = new ArrayBlockingQueue<>(100);
     private static Runnable sWriteRunnable;
     private static boolean is2Stop;
 
@@ -30,21 +26,21 @@ public class Writer {
      * @param _protocol 对应的协议
      * @Descrepetion please setSocket() before.
      */
-    public static void send(MeetingProtocol _protocol) {
-        LogUtil.d(TAG, "send协议:" + _protocol);
+    public static void send(ProtocolShell _protocol) {
+        LogUtil.d(TAG, "send协议:" + _protocol.getBody());
 
-        sBlockingQueue.add(_protocol);
+        sBlockingQueue.add(_protocol.getBody());
     }
 
     public static void stop() {
-        LogUtil.d(TAG,"stop");
+        LogUtil.d(TAG, "stop");
 
         if (sWriteRunnable == null)
             return;
 
         is2Stop = true;
         try {
-            Thread.sleep(1000);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -54,7 +50,7 @@ public class Writer {
     }
 
     public static void restartWrite() {
-        LogUtil.d(TAG,"restartWrite");
+        LogUtil.d(TAG, "restartWrite");
         stop();
         startWrite();
     }
@@ -64,7 +60,7 @@ public class Writer {
      * 推荐在service组件调用
      */
     public static void startWrite() {
-        LogUtil.d(TAG,"startWrite");
+        LogUtil.d(TAG, "startWrite");
         if (sWriteRunnable != null)
             return;
 
@@ -72,33 +68,63 @@ public class Writer {
             @Override
             public void run() {
 
-                //死循环写协议
+                //死循环:写协议
                 while (!is2Stop) {
 
-                    Socket socket = Global.getSocket();
-
-                    if (socket == null || sBlockingQueue.isEmpty())
+                    if (sBlockingQueue.isEmpty())
                         continue;
 
-                    LogUtil.d(TAG, "死循环内开始写");
+                    Socket socket = Global.getSocket();
+                    if (socket == null || socket.isClosed())
+                        continue;
+
+                    BufferedOutputStream bos = null;
                     try {
 
-                        MeetingProtocol protocol = sBlockingQueue.take();
-                        BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-                        bos.write(new Gson().toJson(protocol).getBytes());
+                        //                        socket.setSendBufferSize(10240);
+
+                        //完整协议(数据)
+                        String msg = new Gson().toJson(sBlockingQueue.take());
+
+                        //完整协议数据长度
+                        int length = msg.getBytes().length;
+                        if (length > 99999) {
+                            LogUtil.e(TAG, "协议太长,超出前后台组包规范!");
+                            continue;
+                        }
+
+                        //配上前缀信息,如"$1002"表示完整协议的byte数组长度是1002(暂时支持byte数组长度在4位数以内)
+                        StringBuilder lengthStr = new StringBuilder(String.valueOf(length));
+                        while (lengthStr.length() < 5) {
+                            lengthStr.insert(0, "0");
+                        }
+                        msg = "$" + lengthStr + msg;
+
+                        LogUtil.d(TAG, "要发的协议:" + msg);
+
+                        //写
+                        bos = new BufferedOutputStream(socket.getOutputStream());
+                        bos.write(msg.getBytes());
                         bos.flush();
+
+                        LogUtil.d(TAG, "写出去一个完整的协议:" + msg);
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                        if (Global.getNetWorkState() != NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED) {
-
-                            //与服务器断连
-                            EventBus.getDefault().post(new FailedConn2ServerEvent());
+                    } finally {
+                        try {
+                            if (bos == null)
+                                bos.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 }
             }
         };
         JobExecutor.getInstance().execute(sWriteRunnable);
+
+        //todo-->改用protobuf传输数据
+        //        AddressBookProtos.Person.Builder builder = AddressBookProtos.Person.newBuilder();
     }
 }

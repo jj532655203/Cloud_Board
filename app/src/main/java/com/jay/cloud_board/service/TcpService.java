@@ -6,10 +6,13 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.jay.cloud_board.base.Config;
+import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.base.Global;
 import com.jay.cloud_board.eventbus.FailedConn2ServerEvent;
 import com.jay.cloud_board.eventbus.NetWorkStateChangedEvent;
 import com.jay.cloud_board.meeting_protocal.LoginProtocol;
+import com.jay.cloud_board.meeting_protocal.ProtocolShell;
 import com.jay.cloud_board.tcp.HeartBeat;
 import com.jay.cloud_board.tcp.JobExecutor;
 import com.jay.cloud_board.tcp.Reader;
@@ -60,18 +63,16 @@ public class TcpService extends Service {
 
                         // 建立Socket连接
                         Socket _socket = new Socket();
-                        //                        _socket.connect(new InetSocketAddress("39.98.191.61", 3389), 5000);
-                        _socket.connect(new InetSocketAddress("192.168.1.103", 9423), 5000);
+                        _socket.connect(new InetSocketAddress(Config.serverIp, Config.port), 5000);
 
                         Global.setSocket(_socket);
 
                         //开启线程:发协议
                         Writer.startWrite();
 
-                        //断连服务器
-                        LoginProtocol loginProtocol = new LoginProtocol();
-                        loginProtocol.setUserId(Global.getUserRole());
-                        Writer.send(loginProtocol);
+                        //登录服务器
+                        LoginProtocol loginProtocol = new LoginProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_LOGIN);
+                        Writer.send(new ProtocolShell(loginProtocol));
 
                         //开启线程:读服务端协议
                         Reader.startRead();
