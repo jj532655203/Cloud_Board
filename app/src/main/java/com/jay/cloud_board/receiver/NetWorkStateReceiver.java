@@ -66,6 +66,7 @@ public class NetWorkStateReceiver extends BroadcastReceiver {
             }
         }
 
+        //网络变更才会发出:NetWorkStateChangedEvent事件
         //有网-->无网
         //无网-->有网
         if ((Global.getNetWorkState() != NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED

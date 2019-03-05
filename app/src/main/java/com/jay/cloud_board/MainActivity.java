@@ -61,10 +61,15 @@ public class MainActivity extends AppCompatActivity {
 
     private TcpService.ClientBinder mTcpService;
     private ServiceConnection mTcpConn = new ServiceConnection() {
+
+        /**
+         * 主逻辑步骤:3
+         */
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             LogUtil.d(TAG, "onServiceConnected");
 
+            //服务绑定成功:服务中开启tcp连接
             mTcpService = (TcpService.ClientBinder) service;
             mTcpService.startConnect();
         }
@@ -73,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceDisconnected(ComponentName name) {
             LogUtil.d(TAG, "onServiceDisconnected");
 
+            //服务解绑了:断开tcp连接
             mTcpService.disConnect();
         }
     };
@@ -85,10 +91,17 @@ public class MainActivity extends AppCompatActivity {
         mBoardView.mBoardWriting = mBoardWriting;
     }
 
+    /**
+     * 主逻辑步骤:1
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //本项目通信不方便处大多使用Eventbus,此处注册,相应的在onDestroy中注销
         EventBus.getDefault().register(this);
+
+        //申请INTERNET权限(socket连接需要)
         RxPermissions rxPermissions = new RxPermissions(this);
         rxPermissions.requestEach(Manifest.permission.INTERNET)
                 .subscribe(new Consumer<Permission>() {
@@ -96,6 +109,12 @@ public class MainActivity extends AppCompatActivity {
                     public void accept(Permission permission) throws Exception {
                         if (permission.granted) {
 
+                            /**
+                             * 主逻辑步骤:2
+                             */
+                            //一旦获得网络权限:即可绑定TcpService
+                            // (该服务复杂与服务器的tcp连接,事实证明:服务中开工作线程保持tcp连接比在Mainactivity组件中开工作线程体验更流畅)
+                            //绑定成功后会走 mTcpConn的onServiceConnected方法
                             Intent intent = new Intent(MainActivity.this, TcpService.class);
                             bindService(intent, mTcpConn, BIND_AUTO_CREATE);
                             return;
@@ -105,12 +124,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-        rxPermissions.requestEach(Manifest.permission.INTERNET)
-                .subscribe(new Consumer<Permission>() {
-                    @Override
-                    public void accept(Permission permission) throws Exception {
-                    }
-                });
+
+        //注册:监听网络状态变更广播;相应的在onDestroy中注销
         mNetReceiver = new NetWorkStateReceiver();
         IntentFilter filter = new IntentFilter(NetWorkStateReceiver.CONNECTIVITY_CHANGE);
         registerReceiver(mNetReceiver, filter);
@@ -128,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * 布局中switchRole按钮的点击事件
      * 切换用户角色:A-->B或B-->A
      */
     @Click(R.id.switchRole)
@@ -135,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
         Global.switchRole();
 
-        //切换账号
+        //发送:切换账号协议
         LoginProtocol switchRoleProtocol = new LoginProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_LOGIN);
         Writer.send(new ProtocolShell(switchRoleProtocol));
 
@@ -144,6 +160,9 @@ public class MainActivity extends AppCompatActivity {
         LogUtil.d(TAG, "switchRole role=" + Global.getUserRole());
     }
 
+    /**
+     * 布局中exit按钮的点击事件
+     */
     @Click(R.id.exit)
     public void exit(View view) {
         LogUtil.d(TAG, "exit");
@@ -151,6 +170,9 @@ public class MainActivity extends AppCompatActivity {
         Process.killProcess(Process.myPid());
     }
 
+    /**
+     * 重新连接服务器
+     */
     private void reconn2Server() {
         LogUtil.d(TAG,"reconn2Server");
         Toast.makeText(MainActivity.this, "正在尝试重连服务器!", Toast.LENGTH_SHORT).show();
@@ -159,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * 此处会接收NetWorkStateReceiver类中发出的NetWorkStateChangedEvent(网络状态变更事件)
      * 处理:网络状态变更
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -172,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * 此处会接收某类中发出的FailedConn2ServerEvent(连接服务器失败事件)
      * 处理:无法连接服务器
      *
      * @param event
@@ -187,6 +211,9 @@ public class MainActivity extends AppCompatActivity {
         }, 5000);
     }
 
+    /**
+     * 此处写法:防止内存泄漏
+     */
     private static class UiHandler extends Handler {
         private WeakReference<MainActivity> mActivityRef;
 
@@ -197,6 +224,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
+
+            //延迟:处理与服务器重连任务
             if (msg.what == MSG_RE_CONN_2_SERVER) {
                 mActivityRef.get().reconn2Server();
             }

@@ -61,12 +61,18 @@ public class TcpService extends Service {
                 public void run() {
                     try {
 
+                        /**
+                         * 主逻辑步骤:4
+                         */
                         // 建立Socket连接
                         Socket _socket = new Socket();
                         _socket.connect(new InetSocketAddress(Config.serverIp, Config.port), 5000);
 
                         Global.setSocket(_socket);
 
+                        /**
+                         * 主逻辑步骤:5
+                         */
                         //开启线程:发协议
                         Writer.startWrite();
 
@@ -74,6 +80,9 @@ public class TcpService extends Service {
                         LoginProtocol loginProtocol = new LoginProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_LOGIN);
                         Writer.send(new ProtocolShell(loginProtocol));
 
+                        /**
+                         * 主逻辑步骤:6
+                         */
                         //开启线程:读服务端协议
                         Reader.startRead();
 

@@ -71,6 +71,7 @@ public class Writer {
                 //死循环:写协议
                 while (!is2Stop) {
 
+
                     if (sBlockingQueue.isEmpty())
                         continue;
 
@@ -85,6 +86,15 @@ public class Writer {
 
                         //完整协议(数据)
                         String msg = new Gson().toJson(sBlockingQueue.take());
+
+
+                        /**
+                         * 以下为组包逻规则
+                         * 添加组包逻辑的原因见:https://www.jianshu.com/p/45957e180925
+                         * 1.给需要发出的协议添加前缀:"$00022",其中"$"是起始标识,后5位为本协议转成byte数组后的长度
+                         * 2.相应的解包逻辑见:Reader类
+                         */
+
 
                         //完整协议数据长度
                         int length = msg.getBytes().length;
