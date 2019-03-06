@@ -80,6 +80,7 @@ public class Reader {
                         while ((size = bis.read(bytes)) > 0) {
 
                             String piece = new String(bytes, 0, size).trim();
+                            LogUtil.d(TAG,"piece包:" + piece);
 
                             /**
                              * 解包逻辑:
@@ -103,6 +104,7 @@ public class Reader {
 
                             boolean success = unpack2(dataSb, dataLength, piece);
                             if (!success) {
+                                LogUtil.e(TAG, "unpack failed");
                                 dataSb.delete(0, dataSb.length());
                                 dataLength[0] = 0;
                             }
@@ -133,6 +135,8 @@ public class Reader {
                     if (piece.length() < 6)
                         return false;
 
+					/*//不可能的情况:"$*****"6位字符被分拆,或被接在piece包旧协议数据的最末尾*/
+
                     //异常情况
                     if (piece.indexOf("$") > piece.length() - 6)
                         return false;
@@ -140,6 +144,7 @@ public class Reader {
                     //取出协议的长度值(5位数)
                     try {
                         dataLength[0] = Integer.parseInt(piece.substring(piece.indexOf("$") + 1, piece.indexOf("$") + 6));
+                        LogUtil.e(TAG, "新协议长度=" + dataLength[0]);
                     } catch (Exception e) {
                         LogUtil.e(TAG, "协议书写不规范");
                         return false;
@@ -151,7 +156,7 @@ public class Reader {
                     if (piece.length() < dataLength[0]) {
 
                         dataSb.append(piece);
-                        dataLength[0] += piece.length();
+                        LogUtil.d(TAG, "一条piece解包后 dataSb=" + dataSb);
                         return true;
 
                     /*1.2.piece包余下超过 dataLength 位,即协议数据 后面粘包了*/
@@ -164,6 +169,7 @@ public class Reader {
                     /*1.3.piece包余下刚好 dataLength 位*/
                     } else {
                         appendPiece(dataSb, dataLength, piece);
+                        LogUtil.d(TAG, "一条piece解包后 dataSb=" + dataSb);
                         return true;
                     }
 
@@ -174,7 +180,7 @@ public class Reader {
                     /*2.1.piece包没有 absentLength 位,即协议数据 再次被拆包了*/
                     if (piece.length() < absentLength) {
                         dataSb.append(piece);
-                        dataLength[0] += piece.length();
+                        LogUtil.d(TAG, "一条piece解包后 dataSb=" + dataSb);
                         return true;
 
                     /*2.2.piece包超过 absentLength 位,即协议数据 后面粘包了*/
@@ -186,6 +192,7 @@ public class Reader {
                     } else {
 
                         appendPiece(dataSb, dataLength, piece);
+                        LogUtil.d(TAG, "一条piece解包后 dataSb=" + dataSb);
                         return true;
                     }
 
@@ -211,6 +218,7 @@ public class Reader {
                     dataLength[0] = 0;
                     return false;
                 }
+                LogUtil.d(TAG, "一条piece解包后 dataSb=" + dataSb);
                 return true;
             }
 

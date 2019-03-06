@@ -2,6 +2,9 @@ package com.jay.cloud_board.bean;
 
 import android.graphics.Path;
 
+import com.jay.cloud_board.base.Constant;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -11,7 +14,9 @@ import java.util.UUID;
  * Created by Jay on 2019/3/2.
  */
 
-public class Stroke {
+public class Stroke implements Serializable {
+
+    private static final long serialVersionUid = Constant.SERIAL_UID_STROKE;
 
     private String id;
     private List<Point> points = new ArrayList<>();

@@ -1,7 +1,9 @@
 package com.jay.cloud_board.meeting_protocal;
 
+import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.bean.Point;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -9,9 +11,9 @@ import java.util.ArrayList;
  * Created by Jay on 2019/3/3.
  */
 
-public class AddStrokeProtocol {
+public class AddStrokeProtocol implements Serializable {
 
-
+    private static final long serialVersionUid = Constant.SERIAL_UID_ADD_STROKE;
     private String userId;
     private int protocolType;
     private String receiverUserId;

@@ -63,7 +63,7 @@ public class BoardView extends View {
 
         //一次手势滑动手抬起
         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-            LogUtil.d(TAG, "ontouchEvent action_up");
+            LogUtil.d(TAG, "ontouchEvent action_up mtouchPoints数量=" + mTouchPoints.size());
             addStroke(mTouchPoints);
 
             //笔划数据发给服务端
@@ -74,6 +74,7 @@ public class BoardView extends View {
             addStrokeProtocol.setPoints(points);
             String receiverId = TextUtils.equals(Global.getUserRole(), Global.ROLE_USER_A) ? Global.ROLE_USER_B : Global.ROLE_USER_A;
             addStrokeProtocol.setReceiverUserId(receiverId);
+            LogUtil.d(TAG, "ontouchEvent action_up addStrokeProtocol=" + addStrokeProtocol.toString() + addStrokeProtocol.getPoints().size());
 
             //向服务端发送
             Writer.send(new ProtocolShell(addStrokeProtocol));

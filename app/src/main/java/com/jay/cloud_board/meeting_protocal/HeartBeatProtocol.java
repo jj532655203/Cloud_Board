@@ -1,12 +1,17 @@
 package com.jay.cloud_board.meeting_protocal;
 
+import com.jay.cloud_board.base.Constant;
+
+import java.io.Serializable;
+
 /**
  * @Description 心跳协议
  * Created by jj on 2019/3/4.
  */
 
-public class HeartBeatProtocol  {
+public class HeartBeatProtocol implements Serializable {
 
+    private static final long serialVersionUid = Constant.SERIAL_UID_HEART_BEAT;
     private String userId;
     private int protocolType;
 

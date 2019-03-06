@@ -16,7 +16,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class Writer {
 
     private static final String TAG = Writer.class.getSimpleName();
-    private static ArrayBlockingQueue<Object> sBlockingQueue = new ArrayBlockingQueue<>(100);
+    private static ArrayBlockingQueue<Object> sBlockingQueue = new ArrayBlockingQueue<>(1000);
     private static Runnable sWriteRunnable;
     private static boolean is2Stop;
 
@@ -27,7 +27,7 @@ public class Writer {
      * @Descrepetion please setSocket() before.
      */
     public static void send(ProtocolShell _protocol) {
-        LogUtil.d(TAG, "send协议:" + _protocol.getBody());
+        LogUtil.d(TAG, "send协议:" + _protocol.getBody().toString());
 
         sBlockingQueue.add(_protocol.getBody());
     }

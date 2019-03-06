@@ -1,5 +1,7 @@
 package com.jay.cloud_board.bean;
 
+import com.jay.cloud_board.base.Constant;
+
 import java.io.Serializable;
 
 /**
@@ -8,6 +10,8 @@ import java.io.Serializable;
  */
 
 public class Point implements Serializable {
+
+    private static final long serialVersionUid = Constant.SERIAL_UID_POINT;
     public float X;
     public float Y;
 
@@ -16,5 +20,11 @@ public class Point implements Serializable {
         point.X = X;
         point.Y = Y;
         return point;
+    }
+
+    @Override
+    public String toString() {
+        return "X=" + X +
+                "Y=" + Y;
     }
 }

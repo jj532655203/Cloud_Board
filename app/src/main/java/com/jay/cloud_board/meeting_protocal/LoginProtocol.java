@@ -1,11 +1,13 @@
 package com.jay.cloud_board.meeting_protocal;
 
+import java.io.Serializable;
+
 /**
  * desc:登录/切换账号 协议
  * Created by jj on 2019/3/3.
  */
 
-public class LoginProtocol {
+public class LoginProtocol implements Serializable {
 
     private String userId;
     private int protocolType;
