@@ -1,14 +1,17 @@
 package com.jay.cloud_board.tcp;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-
 import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.base.Global;
+import com.jay.cloud_board.eventbus.Reconnect2ServerEvent;
+import com.jay.cloud_board.eventbus.ServerDeadEvent;
 import com.jay.cloud_board.meeting_protocal.HeartBeatProtocol;
 import com.jay.cloud_board.meeting_protocal.ProtocolShell;
 import com.jay.cloud_board.util.LogUtil;
+
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /**
@@ -18,18 +21,10 @@ import com.jay.cloud_board.util.LogUtil;
 
 public class HeartBeat {
 
-    private static final long HEART_BEAT_TIME = 5000;
-    private static final int MSG_BEAT = 0;
     private static final String TAG = HeartBeat.class.getSimpleName();
-    private static Handler mHandler = new Handler(Looper.getMainLooper()) {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == MSG_BEAT) {
-                startBeat();
-            }
-        }
-    };
+    private static final long HEART_BEAT_PERIOD = 15000;
+    public static long sLastServerBeatTime;
+    private static Timer mTimer;
 
     /**
      * 开启心跳任务
@@ -37,19 +32,42 @@ public class HeartBeat {
     public static void startBeat() {
         LogUtil.d(TAG, "startBeat");
 
-        mHandler.postDelayed(new Runnable() {
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
+
+                //发心跳包
                 HeartBeatProtocol protocol = new HeartBeatProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_BEART_HEAT);
                 Writer.send(new ProtocolShell(protocol));
-                mHandler.obtainMessage(MSG_BEAT).sendToTarget();
-            }
-        }, HEART_BEAT_TIME);
 
+                //判断服务器是否宕机
+                judgeAlive();
+            }
+        }, 0, HEART_BEAT_PERIOD);
+    }
+
+    /**
+     * 判断与服务器连接状态
+     */
+    private static void judgeAlive() {
+        long waitTime = (System.currentTimeMillis() - sLastServerBeatTime) / 1000;
+
+        //重连服务器
+        if (15 < waitTime && waitTime <= 100) {
+            EventBus.getDefault().post(new Reconnect2ServerEvent());
+
+            //提示用户 :服务器宕机了
+        } else if (waitTime > 100) {
+            EventBus.getDefault().post(new ServerDeadEvent());
+            stop();
+        }
     }
 
     public static void stop() {
         LogUtil.d(TAG, "stop");
-        mHandler.removeCallbacksAndMessages(null);
+        if (mTimer != null) {
+            mTimer.cancel();
+        }
     }
 }

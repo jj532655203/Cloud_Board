@@ -9,8 +9,6 @@ import android.support.annotation.Nullable;
 import com.jay.cloud_board.base.Config;
 import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.base.Global;
-import com.jay.cloud_board.eventbus.FailedConn2ServerEvent;
-import com.jay.cloud_board.eventbus.NetWorkStateChangedEvent;
 import com.jay.cloud_board.meeting_protocal.LoginProtocol;
 import com.jay.cloud_board.meeting_protocal.ProtocolShell;
 import com.jay.cloud_board.tcp.HeartBeat;
@@ -18,8 +16,6 @@ import com.jay.cloud_board.tcp.JobExecutor;
 import com.jay.cloud_board.tcp.Reader;
 import com.jay.cloud_board.tcp.Writer;
 import com.jay.cloud_board.util.LogUtil;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -91,9 +87,7 @@ public class TcpService extends Service {
 
                     } catch (IOException e) {
                         e.printStackTrace();
-                        if (Global.getNetWorkState() != NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED)
-                            EventBus.getDefault().post(new FailedConn2ServerEvent());
-                        LogUtil.e(TAG, "mmConnectRun run() 无法连接服务器");
+                        LogUtil.e(TAG, "mmConnectRun run() 连接服务器异常");
                     }
                 }
             });
@@ -107,7 +101,6 @@ public class TcpService extends Service {
 
             Writer.stop();
             Reader.stop();
-            HeartBeat.stop();
 
             JobExecutor.getInstance().execute(new Runnable() {
                 @Override

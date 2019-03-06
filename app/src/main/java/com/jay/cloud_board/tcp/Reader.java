@@ -5,7 +5,6 @@ import com.jay.cloud_board.util.LogUtil;
 
 import java.io.BufferedInputStream;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 
 /**
  * Created by jj on 2019/3/3.
@@ -16,7 +15,6 @@ public class Reader {
     private static final String TAG = Reader.class.getSimpleName();
     private static Runnable sReadRunnable;
     private static boolean is2Stop;
-    private static ByteBuffer mByteBuffer = ByteBuffer.allocate(10240);
 
     public static void stop() {
         LogUtil.d(TAG, "stop");
@@ -65,7 +63,7 @@ public class Reader {
                     BufferedInputStream bis = null;
                     try {
 
-                        //                        socket.setReceiveBufferSize(10240);
+                        socket.setReceiveBufferSize(10240);
 
                         byte[] bytes = new byte[1024];
                         int size;
@@ -79,8 +77,11 @@ public class Reader {
                         bis = new BufferedInputStream(socket.getInputStream());
                         while ((size = bis.read(bytes)) > 0) {
 
+                            //更新最新收到服务器消息的时间
+                            HeartBeat.sLastServerBeatTime = System.currentTimeMillis();
+
                             String piece = new String(bytes, 0, size).trim();
-                            LogUtil.d(TAG,"piece包:" + piece);
+                            LogUtil.d(TAG, "piece包:" + piece);
 
                             /**
                              * 解包逻辑:
@@ -102,7 +103,7 @@ public class Reader {
                              *
                              */
 
-                            boolean success = unpack2(dataSb, dataLength, piece);
+                            boolean success = unpack(dataSb, dataLength, piece);
                             if (!success) {
                                 LogUtil.e(TAG, "unpack failed");
                                 dataSb.delete(0, dataSb.length());
@@ -126,7 +127,7 @@ public class Reader {
             /**
              * 解包
              */
-            private boolean unpack2(StringBuilder dataSb, int[] dataLength, String piece) {
+            private boolean unpack(StringBuilder dataSb, int[] dataLength, String piece) {
 
                 /*1.dataSb长度==0,该数据包以"$*****"的6位为前缀,之后为协议的原始内容;长度为*****(取值范围0-99999),赋值给dataLength*/
                 if (dataSb.length() == 0) {
@@ -212,7 +213,7 @@ public class Reader {
 
                 //递归处理余下的piece包数据
                 piece = piece.substring(absentLength, piece.length());
-                boolean success = unpack2(dataSb, dataLength, piece);
+                boolean success = unpack(dataSb, dataLength, piece);
                 if (!success) {
                     dataSb.delete(0, dataSb.length());
                     dataLength[0] = 0;

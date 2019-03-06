@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.Process;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -19,8 +17,9 @@ import android.widget.Toast;
 
 import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.base.Global;
-import com.jay.cloud_board.eventbus.FailedConn2ServerEvent;
 import com.jay.cloud_board.eventbus.NetWorkStateChangedEvent;
+import com.jay.cloud_board.eventbus.Reconnect2ServerEvent;
+import com.jay.cloud_board.eventbus.ServerDeadEvent;
 import com.jay.cloud_board.meeting_protocal.LoginProtocol;
 import com.jay.cloud_board.meeting_protocal.ProtocolShell;
 import com.jay.cloud_board.receiver.NetWorkStateReceiver;
@@ -40,8 +39,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.lang.ref.WeakReference;
-
 import io.reactivex.functions.Consumer;
 
 @EActivity(R.layout.activity_main)
@@ -49,15 +46,12 @@ import io.reactivex.functions.Consumer;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final int MSG_RE_CONN_2_SERVER = 0;
     @ViewById(R.id.boardView)
     public BoardView mBoardView;
     @ViewById(R.id.boardWriting)
     public BoardWriting mBoardWriting;
     @ViewById(R.id.switchRole)
     public TextView mSwitchRole;
-
-    private Handler mHandler = new UiHandler(new WeakReference<>(this));
 
     private TcpService.ClientBinder mTcpService;
     private ServiceConnection mTcpConn = new ServiceConnection() {
@@ -139,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
             EventBus.getDefault().unregister(this);
         if (mNetReceiver != null)
             unregisterReceiver(mNetReceiver);
-        mHandler.removeCallbacksAndMessages(null);
     }
 
     /**
@@ -174,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
      * 重新连接服务器
      */
     private void reconn2Server() {
-        LogUtil.d(TAG,"reconn2Server");
+        LogUtil.d(TAG, "reconn2Server");
         Toast.makeText(MainActivity.this, "正在尝试重连服务器!", Toast.LENGTH_SHORT).show();
         mTcpService.disConnect();
         mTcpService.startConnect();
@@ -186,49 +179,27 @@ public class MainActivity extends AppCompatActivity {
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleNetworkStateChangedException(NetWorkStateChangedEvent event) {
-        LogUtil.d(TAG,"handleNetworkStateChangedException");
+        LogUtil.d(TAG, "handleNetworkStateChangedException");
         if (Global.getNetWorkState() == NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED)
             Toast.makeText(MainActivity.this, "请检查网络!", Toast.LENGTH_SHORT).show();
-        else{
-            reconn2Server();
-        }
     }
 
     /**
-     * 此处会接收某类中发出的FailedConn2ServerEvent(连接服务器失败事件)
-     * 处理:无法连接服务器
-     *
-     * @param event
+     * 心跳机制发现:与服务器无法重新连接
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleFailedConn2ServerEvent(FailedConn2ServerEvent event) {
-        LogUtil.d(TAG,"handleFailedConn2ServerEvent");
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mHandler.obtainMessage(MSG_RE_CONN_2_SERVER).sendToTarget();
-            }
-        }, 5000);
+    public void handleServerDeadEvent(ServerDeadEvent event) {
+        LogUtil.d(TAG, "handleServerDeadEvent");
+        Toast.makeText(MainActivity.this, "与服务器失去连接!", Toast.LENGTH_SHORT).show();
     }
 
     /**
-     * 此处写法:防止内存泄漏
+     * 心跳机制发现与服务器失去连接,尝试重新连接
      */
-    private static class UiHandler extends Handler {
-        private WeakReference<MainActivity> mActivityRef;
-
-        public UiHandler(WeakReference<MainActivity> reference) {
-            mActivityRef = reference;
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-
-            //延迟:处理与服务器重连任务
-            if (msg.what == MSG_RE_CONN_2_SERVER) {
-                mActivityRef.get().reconn2Server();
-            }
-        }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleReconnect2ServerEvent(Reconnect2ServerEvent event) {
+        LogUtil.d(TAG, "handleReconnect2ServerEvent");
+        reconn2Server();
     }
+
 }

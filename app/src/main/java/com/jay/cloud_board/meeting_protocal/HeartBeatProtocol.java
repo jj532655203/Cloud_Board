@@ -41,9 +41,9 @@ public class HeartBeatProtocol implements Serializable {
 
     @Override
     public String toString() {
-        return "ProtocolShell{" +
+        return "HeartBeatProtocol{" +
                 "userId='" + userId + '\'' +
-                ", protocolType='" + protocolType + '\'' +
+                ", protocolType=" + protocolType +
                 '}';
     }
 }

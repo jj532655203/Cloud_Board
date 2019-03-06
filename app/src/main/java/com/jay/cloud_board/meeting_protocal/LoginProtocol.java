@@ -38,9 +38,9 @@ public class LoginProtocol implements Serializable {
 
     @Override
     public String toString() {
-        return "ProtocolShell{" +
+        return "LoginProtocol{" +
                 "userId='" + userId + '\'' +
-                ", protocolType='" + protocolType + '\'' +
+                ", protocolType=" + protocolType +
                 '}';
     }
 }
