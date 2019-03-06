@@ -7,7 +7,7 @@ import java.io.Serializable;
  * Created by jj on 2019/3/3.
  */
 
-public class LoginProtocol implements Serializable {
+public class LoginProtocol implements Serializable, ITcpProtocol {
 
     private String userId;
     private int protocolType;

@@ -21,7 +21,6 @@ import com.jay.cloud_board.eventbus.NetWorkStateChangedEvent;
 import com.jay.cloud_board.eventbus.Reconnect2ServerEvent;
 import com.jay.cloud_board.eventbus.ServerDeadEvent;
 import com.jay.cloud_board.meeting_protocal.LoginProtocol;
-import com.jay.cloud_board.meeting_protocal.ProtocolShell;
 import com.jay.cloud_board.receiver.NetWorkStateReceiver;
 import com.jay.cloud_board.service.TcpService;
 import com.jay.cloud_board.tcp.Writer;
@@ -146,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
 
         //发送:切换账号协议
         LoginProtocol switchRoleProtocol = new LoginProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_LOGIN);
-        Writer.send(new ProtocolShell(switchRoleProtocol));
+        Writer.send(switchRoleProtocol);
 
         mSwitchRole.setText("切换账号:" + Global.getUserRole());
 

@@ -9,7 +9,7 @@ import java.io.Serializable;
  * Created by jj on 2019/3/4.
  */
 
-public class HeartBeatProtocol implements Serializable {
+public class HeartBeatProtocol implements Serializable, ITcpProtocol {
 
     private static final long serialVersionUid = Constant.SERIAL_UID_HEART_BEAT;
     private String userId;

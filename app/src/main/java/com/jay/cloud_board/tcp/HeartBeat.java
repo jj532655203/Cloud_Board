@@ -5,7 +5,6 @@ import com.jay.cloud_board.base.Global;
 import com.jay.cloud_board.eventbus.Reconnect2ServerEvent;
 import com.jay.cloud_board.eventbus.ServerDeadEvent;
 import com.jay.cloud_board.meeting_protocal.HeartBeatProtocol;
-import com.jay.cloud_board.meeting_protocal.ProtocolShell;
 import com.jay.cloud_board.util.LogUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -39,7 +38,7 @@ public class HeartBeat {
 
                 //发心跳包
                 HeartBeatProtocol protocol = new HeartBeatProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_BEART_HEAT);
-                Writer.send(new ProtocolShell(protocol));
+                Writer.send(protocol);
 
                 //判断服务器是否宕机
                 judgeAlive();

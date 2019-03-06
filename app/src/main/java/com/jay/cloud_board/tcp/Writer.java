@@ -2,7 +2,7 @@ package com.jay.cloud_board.tcp;
 
 import com.google.gson.Gson;
 import com.jay.cloud_board.base.Global;
-import com.jay.cloud_board.meeting_protocal.ProtocolShell;
+import com.jay.cloud_board.meeting_protocal.ITcpProtocol;
 import com.jay.cloud_board.util.LogUtil;
 
 import java.io.BufferedOutputStream;
@@ -16,7 +16,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class Writer {
 
     private static final String TAG = Writer.class.getSimpleName();
-    private static ArrayBlockingQueue<Object> sBlockingQueue = new ArrayBlockingQueue<>(1000);
+    private static ArrayBlockingQueue<ITcpProtocol> sBlockingQueue = new ArrayBlockingQueue<>(1000);
     private static Runnable sWriteRunnable;
     private static boolean is2Stop;
 
@@ -26,10 +26,10 @@ public class Writer {
      * @param _protocol 对应的协议
      * @Descrepetion please setSocket() before.
      */
-    public static void send(ProtocolShell _protocol) {
-        LogUtil.d(TAG, "send协议:" + _protocol.getBody().toString());
+    public static void send(ITcpProtocol _protocol) {
+        LogUtil.d(TAG, "send协议:" + _protocol.toString());
 
-        sBlockingQueue.add(_protocol.getBody());
+        sBlockingQueue.add(_protocol);
     }
 
     public static void stop() {

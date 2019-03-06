@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * Created by Jay on 2019/3/3.
  */
 
-public class AddStrokeProtocol implements Serializable {
+public class AddStrokeProtocol implements Serializable, ITcpProtocol {
 
     private static final long serialVersionUid = Constant.SERIAL_UID_ADD_STROKE;
     private String userId;

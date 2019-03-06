@@ -12,11 +12,10 @@ import android.view.View;
 
 import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.base.Global;
-import com.jay.cloud_board.meeting_protocal.ProtocolShell;
-import com.jay.cloud_board.tcp.Writer;
 import com.jay.cloud_board.bean.Point;
 import com.jay.cloud_board.bean.Stroke;
 import com.jay.cloud_board.meeting_protocal.AddStrokeProtocol;
+import com.jay.cloud_board.tcp.Writer;
 import com.jay.cloud_board.util.LogUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -77,7 +76,7 @@ public class BoardView extends View {
             LogUtil.d(TAG, "ontouchEvent action_up addStrokeProtocol=" + addStrokeProtocol.toString() + addStrokeProtocol.getPoints().size());
 
             //向服务端发送
-            Writer.send(new ProtocolShell(addStrokeProtocol));
+            Writer.send(addStrokeProtocol);
             mTouchPoints.clear();
 
             //恢复BoardWriting空屏状态

@@ -10,7 +10,6 @@ import com.jay.cloud_board.base.Config;
 import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.base.Global;
 import com.jay.cloud_board.meeting_protocal.LoginProtocol;
-import com.jay.cloud_board.meeting_protocal.ProtocolShell;
 import com.jay.cloud_board.tcp.HeartBeat;
 import com.jay.cloud_board.tcp.JobExecutor;
 import com.jay.cloud_board.tcp.Reader;
@@ -74,7 +73,7 @@ public class TcpService extends Service {
 
                         //登录服务器
                         LoginProtocol loginProtocol = new LoginProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_LOGIN);
-                        Writer.send(new ProtocolShell(loginProtocol));
+                        Writer.send(loginProtocol);
 
                         /**
                          * 主逻辑步骤:6
