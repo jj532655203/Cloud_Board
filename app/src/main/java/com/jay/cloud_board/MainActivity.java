@@ -23,6 +23,7 @@ import com.jay.cloud_board.eventbus.ServerDeadEvent;
 import com.jay.cloud_board.meeting_protocal.LoginProtocol;
 import com.jay.cloud_board.receiver.NetWorkStateReceiver;
 import com.jay.cloud_board.service.TcpService;
+import com.jay.cloud_board.tcp.HeartBeat;
 import com.jay.cloud_board.tcp.Writer;
 import com.jay.cloud_board.util.LogUtil;
 import com.jay.cloud_board.widget.BoardView;
@@ -65,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
             //服务绑定成功:服务中开启tcp连接
             mTcpService = (TcpService.ClientBinder) service;
             mTcpService.startConnect();
+
+            //开启心跳机制
+            HeartBeat.startBeat();
         }
 
         @Override
@@ -170,6 +174,9 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(MainActivity.this, "正在尝试重连服务器!", Toast.LENGTH_SHORT).show();
         mTcpService.disConnect();
         mTcpService.startConnect();
+
+        //开启心跳机制
+        HeartBeat.startBeat();
     }
 
     /**

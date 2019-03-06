@@ -22,13 +22,16 @@ public class HeartBeat {
 
     private static final String TAG = HeartBeat.class.getSimpleName();
     private static final long HEART_BEAT_PERIOD = 15000;
-    public static long sLastServerBeatTime;
+    public static long sLastServerBeatTime = System.currentTimeMillis();
     private static Timer mTimer;
 
     /**
      * 开启心跳任务
      */
     public static void startBeat() {
+        if (mTimer != null)
+            return;
+
         LogUtil.d(TAG, "startBeat");
 
         mTimer = new Timer();
@@ -37,13 +40,13 @@ public class HeartBeat {
             public void run() {
 
                 //发心跳包
-                HeartBeatProtocol protocol = new HeartBeatProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_BEART_HEAT);
-                Writer.send(protocol);
+                HeartBeatProtocol beatProtocol = new HeartBeatProtocol(Global.getUserRole(), Constant.PROTOCOL_TYPE_BEART_HEAT);
+                Writer.send(beatProtocol);
 
                 //判断服务器是否宕机
                 judgeAlive();
             }
-        }, 0, HEART_BEAT_PERIOD);
+        }, 15000, HEART_BEAT_PERIOD);
     }
 
     /**
@@ -67,6 +70,7 @@ public class HeartBeat {
         LogUtil.d(TAG, "stop");
         if (mTimer != null) {
             mTimer.cancel();
+            mTimer = null;
         }
     }
 }

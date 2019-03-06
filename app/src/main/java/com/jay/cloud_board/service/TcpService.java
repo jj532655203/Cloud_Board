@@ -81,9 +81,7 @@ public class TcpService extends Service {
                         //开启线程:读服务端协议
                         Reader.startRead();
 
-                        //开启心跳机制
-                        HeartBeat.startBeat();
-
+                        HeartBeat.sLastServerBeatTime = System.currentTimeMillis();
                     } catch (IOException e) {
                         e.printStackTrace();
                         LogUtil.e(TAG, "mmConnectRun run() 连接服务器异常");
