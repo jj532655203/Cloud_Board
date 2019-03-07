@@ -31,6 +31,10 @@ public class Global {
         return sUserRole;
     }
 
+    public static void setUserRole(String userRole) {
+        sUserRole = userRole;
+    }
+
     public static Socket getSocket() {
         return sSocket;
     }

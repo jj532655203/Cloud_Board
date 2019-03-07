@@ -2,6 +2,7 @@ package com.jay.cloud_board;
 
 import android.Manifest;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -9,22 +10,18 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.base.Global;
 import com.jay.cloud_board.eventbus.NetWorkStateChangedEvent;
 import com.jay.cloud_board.eventbus.Reconnect2ServerEvent;
 import com.jay.cloud_board.eventbus.ServerDeadEvent;
-import com.jay.cloud_board.meeting_protocal.LoginProtocol;
 import com.jay.cloud_board.receiver.NetWorkStateReceiver;
 import com.jay.cloud_board.service.TcpService;
-import com.jay.cloud_board.tcp.HeartBeat;
-import com.jay.cloud_board.tcp.Writer;
 import com.jay.cloud_board.util.LogUtil;
 import com.jay.cloud_board.widget.BoardView;
 import com.jay.cloud_board.widget.BoardWriting;
@@ -50,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
     public BoardView mBoardView;
     @ViewById(R.id.boardWriting)
     public BoardWriting mBoardWriting;
-    @ViewById(R.id.switchRole)
-    public TextView mSwitchRole;
+    //    @ViewById(R.id.switchRole)
+    //    public TextView mSwitchRole;
 
     private TcpService.ClientBinder mTcpService;
     private ServiceConnection mTcpConn = new ServiceConnection() {
@@ -68,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             mTcpService.startConnect();
 
             //开启心跳机制
-            HeartBeat.startBeat();
+            //            HeartBeat.startBeat();
         }
 
         @Override
@@ -98,6 +95,37 @@ public class MainActivity extends AppCompatActivity {
         //本项目通信不方便处大多使用Eventbus,此处注册,相应的在onDestroy中注销
         EventBus.getDefault().register(this);
 
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog alertDialog = builder
+                .setTitle("请选择角色")
+                .setMessage("不要选其他端选过的角色.")
+                .setPositiveButton("角色B", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Global.setUserRole(Global.ROLE_USER_B);
+                        permission();
+
+                    }
+                }).setNegativeButton("角色A", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Global.setUserRole(Global.ROLE_USER_A);
+                        permission();
+                    }
+                }).create();
+        alertDialog.show();
+        alertDialog.setCanceledOnTouchOutside(false);
+
+
+        //注册:监听网络状态变更广播;相应的在onDestroy中注销
+        mNetReceiver = new NetWorkStateReceiver();
+        IntentFilter filter = new IntentFilter(NetWorkStateReceiver.CONNECTIVITY_CHANGE);
+        registerReceiver(mNetReceiver, filter);
+    }
+
+    private void permission() {
+
         //申请INTERNET权限(socket连接需要)
         RxPermissions rxPermissions = new RxPermissions(this);
         rxPermissions.requestEach(Manifest.permission.INTERNET)
@@ -121,11 +149,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-
-        //注册:监听网络状态变更广播;相应的在onDestroy中注销
-        mNetReceiver = new NetWorkStateReceiver();
-        IntentFilter filter = new IntentFilter(NetWorkStateReceiver.CONNECTIVITY_CHANGE);
-        registerReceiver(mNetReceiver, filter);
     }
 
     @Override
@@ -142,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
      * 布局中switchRole按钮的点击事件
      * 切换用户角色:A-->B或B-->A
      */
-    @Click(R.id.switchRole)
+    /*@Click(R.id.switchRole)
     public void switchRole(View view) {
 
         Global.switchRole();
@@ -154,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
         mSwitchRole.setText("切换账号:" + Global.getUserRole());
 
         LogUtil.d(TAG, "switchRole role=" + Global.getUserRole());
-    }
+    }*/
 
     /**
      * 布局中exit按钮的点击事件
@@ -162,8 +185,12 @@ public class MainActivity extends AppCompatActivity {
     @Click(R.id.exit)
     public void exit(View view) {
         LogUtil.d(TAG, "exit");
-        //        finish();
-        Process.killProcess(Process.myPid());
+//        LogoutProtocol logoutProtocol = new LogoutProtocol();
+//        logoutProtocol.setUserId(Global.getUserRole());
+//        logoutProtocol.setProtocolType(Constant.PROTOCOL_TYPE_LOGOUT);
+//        Writer.send(logoutProtocol);
+//        finish();
+                Process.killProcess(Process.myPid());
     }
 
     /**
@@ -174,9 +201,6 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(MainActivity.this, "正在尝试重连服务器!", Toast.LENGTH_SHORT).show();
         mTcpService.disConnect();
         mTcpService.startConnect();
-
-        //开启心跳机制
-        HeartBeat.startBeat();
     }
 
     /**
@@ -186,8 +210,9 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleNetworkStateChangedException(NetWorkStateChangedEvent event) {
         LogUtil.d(TAG, "handleNetworkStateChangedException");
-        if (Global.getNetWorkState() == NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED)
+        if (Global.getNetWorkState() == NetWorkStateChangedEvent.NetStateType.TYPE_NONE_CONNECTED) {
             Toast.makeText(MainActivity.this, "请检查网络!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**

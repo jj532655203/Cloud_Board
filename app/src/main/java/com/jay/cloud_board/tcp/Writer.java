@@ -67,6 +67,7 @@ public class Writer {
         sWriteRunnable = new Runnable() {
             @Override
             public void run() {
+                BufferedOutputStream bos = null;
 
                 //死循环:写协议
                 while (!is2Stop) {
@@ -79,7 +80,6 @@ public class Writer {
                     if (socket == null || socket.isClosed())
                         continue;
 
-                    BufferedOutputStream bos = null;
                     try {
 
                         //                        socket.setSendBufferSize(10240);
@@ -121,15 +121,16 @@ public class Writer {
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                    } finally {
-                        try {
-                            if (bos == null)
-                                bos.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
                     }
                 }
+
+                //关流
+                /*if (bos != null)
+                    try {
+                        bos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }*/
             }
         };
         JobExecutor.getInstance().execute(sWriteRunnable);

@@ -52,6 +52,7 @@ public class Reader {
         sReadRunnable = new Runnable() {
             @Override
             public void run() {
+                BufferedInputStream bis = null;
 
                 //死循环:读服务端数据
                 while (!is2Stop) {
@@ -60,7 +61,6 @@ public class Reader {
                     if (socket == null || socket.isClosed())
                         continue;
 
-                    BufferedInputStream bis = null;
                     try {
 
                         socket.setReceiveBufferSize(10240);
@@ -113,15 +113,16 @@ public class Reader {
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                    } finally {
-                        try {
-                            if (bis != null)
-                                bis.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
                     }
                 }
+
+                //关流
+                /*if (bis != null)
+                    try {
+                        bis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }*/
             }
 
             /**
