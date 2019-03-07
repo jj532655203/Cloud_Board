@@ -10,7 +10,6 @@ import com.jay.cloud_board.base.Config;
 import com.jay.cloud_board.base.Constant;
 import com.jay.cloud_board.base.Global;
 import com.jay.cloud_board.meeting_protocal.LoginProtocol;
-import com.jay.cloud_board.tcp.HeartBeat;
 import com.jay.cloud_board.tcp.JobExecutor;
 import com.jay.cloud_board.tcp.Reader;
 import com.jay.cloud_board.tcp.Writer;
@@ -81,7 +80,7 @@ public class TcpService extends Service {
                         //开启线程:读服务端协议
                         Reader.startRead();
 
-                        HeartBeat.sLastServerBeatTime = System.currentTimeMillis();
+//                        HeartBeat.sLastServerBeatTime = System.currentTimeMillis();
                     } catch (IOException e) {
                         e.printStackTrace();
                         LogUtil.e(TAG, "mmConnectRun run() 连接服务器异常");
